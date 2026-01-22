@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化学基礎正誤チェック</title>
+    <style>
+        :root {
+            --primary-color: #ff9a9e;
+            --secondary-color: #fad0c4;
+            --accent-color: #4facfe;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #ffd1ff 100%);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        #app-container {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #ff6b6b;
+            margin-bottom: 5px;
+        }
+
+        .description {
+            font-size: 0.9rem;
+            background: #fff0f0;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px dashed #ff9a9e;
+        }
+
+        #character-area {
+            font-size: 3rem;
+            margin: 10px 0;
+            height: 60px;
+        }
+
+        #question-card {
+            background: #f8f9fa;
+            padding: 30px 20px;
+            border-radius: 15px;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            line-height: 1.6;
+            cursor: pointer;
+            border: 3px solid #eee;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        #question-card:active {
+            transform: scale(0.98);
+        }
+
+        #answer-area {
+            min-height: 80px;
+            margin-bottom: 20px;
+        }
+
+        .answer-box {
+            display: none;
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 15px;
+            color: #1565c0;
+            font-size: 1.4rem;
+            font-weight: bold;
+            animation: bounceIn 0.5s;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: translateY(2px);
+        }
+
+        #progress {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<div id-container id="app-container">
+    <h1>化学基礎正誤チェック</h1>
+    <p class="description">（　）の語句が正しければ〇、間違っていれば正しい語句を考えよう！</p>
+    
+    <div id="character-area">🐶</div>
+    
+    <div id="question-card" onclick="showAnswer()">
+        問題を表示中...
+    </div>
+
+    <div id="answer-area">
+        <div id="answer-box" class="answer-box"></div>
+    </div>
+
+    <button id="next-btn" onclick="nextQuestion()">次へ進む</button>
+    
+    <div id="progress"></div>
+</div>
+
+<script>
+    // Excelデータから抽出した問題リスト
+    const allQuestions = [
+        { q: "（酸素、水、塩化ナトリウム）はすべて純物質である。", a: "〇" },
+        { q: "純物質の融点、沸点は一定だが、混合物の融点、沸点は（一定ではない）。", a: "〇" },
+        { q: "混合物は、物理的方法で2種類以上の（純物質）に分けられる。", a: "〇" },
+        { q: "（ろ過）でヨウ素と砂の混合物からヨウ素だけを取り出すことができる。", a: "昇華法" },
+        { q: "塩化銀の沈殿を含む水溶液から、塩化銀だけを取り出すには（ろ過）を用いる。", a: "〇" },
+        { q: "食塩水（溶液）から水（溶媒）だけを分離する際は（蒸留）を用いる。", a: "〇" },
+        { q: "（蒸留）とは、2種類以上の液体の混合物を沸点の差を利用して各成分に分離する方法である。", a: "分留" },
+        { q: "再結晶とは、不純物を含む結晶を溶媒に溶かしてから冷却し、純粋な（結晶）として取り出す方法である。", a: "〇" },
+        { q: "再結晶は、（凝固点）の差を利用した分離方法である。", a: "溶解度" },
+        { q: "（ヨウ素、二酸化炭素、ナフタレン）はどれも昇華しやすい気体である。", a: "〇" },
+        { q: "溶媒への溶解性の違いを利用し、固体や液体の混合物から目的の物質を取り出す方法を（抽出法）という。", a: "〇" },
+        { q: "ろ紙に対する吸着力の違いを利用して、色素などの混合物を分離する操作を(ペーパークロマトグラフィー)という。", a: "〇" }
+    ];
+
+    let questions = [];
+    let currentIndex = 0;
+    const characters = ["🐶", "🐱"];
+
+    function initGame() {
+        // 問題をシャッフル
+        questions = [...allQuestions].sort(() => Math.random() - 0.5);
+        currentIndex = 0;
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const qCard = document.getElementById('question-card');
+        const aBox = document.getElementById('answer-box');
+        const charArea = document.getElementById('character-area');
+        const progress = document.getElementById('progress');
+
+        // キャラクターを交代
+        charArea.innerText = characters[currentIndex % 2];
+        
+        qCard.innerText = questions[currentIndex].q;
+        aBox.style.display = 'none';
+        aBox.innerText = "答え： " + questions[currentIndex].a;
+        
+        progress.innerText = (currentIndex + 1) + " / " + questions.length;
+    }
+
+    function showAnswer() {
+        document.getElementById('answer-box').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex < questions.length) {
+            showQuestion();
+        } else {
+            alert("全問終了！最初に戻ります。");
+            initGame();
+        }
+    }
+
+    // 初回起動
+    initGame();
+</script>
+
+</body>
+</html>
