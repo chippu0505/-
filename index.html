@@ -4,107 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>化学基礎正誤チェック</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --main-green: #e8f5e9;
-            --dark-green: #2e7d32;
-            --main-blue: #e3f2fd;
-            --dark-blue: #1565c0;
-            --accent-yellow: #fff9c4;
+            --primary-blue: #0077b6;
+            --primary-green: #2a9d8f;
+            --accent-yellow: #e9c46a;
+            --bg-color: #f0f9ff;
             --text-color: #333;
         }
 
         body {
-            font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
-            background-color: #f1f8e9;
+            font-family: 'Kiwi Maru', serif;
+            background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             min-height: 100vh;
         }
 
         .container {
-            width: 100%;
+            width: 90%;
             max-width: 500px;
             background: white;
-            border-radius: 25px;
             padding: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            border: 4px solid var(--dark-green);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             text-align: center;
+            border: 4px solid var(--primary-green);
+        }
+
+        header {
+            margin-bottom: 20px;
         }
 
         h1 {
-            color: var(--dark-blue);
-            font-size: 1.4rem;
+            color: var(--primary-blue);
+            font-size: 1.5rem;
             margin: 0 0 10px 0;
         }
 
-        .desc {
+        .description {
             font-size: 0.9rem;
-            background: var(--main-blue);
+            background: var(--bg-color);
             padding: 10px;
             border-radius: 10px;
-            margin-bottom: 20px;
             line-height: 1.4;
-            font-weight: bold;
         }
 
         #quiz-area {
-            background: var(--main-green);
-            border-radius: 20px;
-            padding: 30px 20px;
-            margin-bottom: 20px;
-            min-height: 200px;
+            min-height: 250px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             cursor: pointer;
-            transition: 0.2s;
-            position: relative;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px dashed #ccc;
+            border-radius: 15px;
+            transition: all 0.3s ease;
         }
 
         #quiz-area:active {
             transform: scale(0.98);
         }
 
-        .animal-icon {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-
-        .question-text {
-            font-size: 1.1rem;
+        #question-text {
+            font-size: 1.2rem;
             font-weight: bold;
-            line-height: 1.6;
             margin-bottom: 20px;
+            line-height: 1.6;
         }
 
-        .answer-box {
-            background: white;
-            color: #d32f2f;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            border: 2px solid #d32f2f;
+        #answer-area {
             display: none;
+            padding: 15px;
+            border-radius: 10px;
+            background: var(--accent-yellow);
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .answer-label {
+            font-size: 0.8rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #answer-text {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #d62828;
         }
 
         .btn-next {
-            background: var(--dark-blue);
+            background: var(--primary-blue);
             color: white;
             border: none;
             padding: 15px 40px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px #0d47a1;
+            box-shadow: 0 4px 0 #005f8d;
+            font-family: inherit;
+            display: none;
             width: 100%;
-            font-weight: bold;
         }
 
         .btn-next:active {
@@ -112,99 +122,95 @@
             transform: translateY(4px);
         }
 
-        .counter {
+        .progress {
             margin-top: 15px;
             font-size: 0.8rem;
-            color: #666;
+            color: #888;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>化学基礎正誤チェック</h1>
-    <div class="desc">（　）の語句が正しければ〇、<br>間違っていれば正しい語句を考えよう！</div>
+    <header>
+        <h1>化学基礎正誤チェック</h1>
+        <div class="description">（　）の語句が正しければ〇、間違っていれば正しい語句を考えよう！</div>
+    </header>
 
-    <div id="quiz-area" onclick="revealAnswer()">
-        <div id="animal" class="animal-icon">🐶</div>
-        <div id="q-text" class="question-text">問題読み込み中...</div>
-        <div id="a-text" class="answer-box"></div>
+    <div id="quiz-area" onclick="showAnswer()">
+        <div id="question-text">読み込み中...</div>
+        <div id="answer-area">
+            <span class="answer-label">答え</span>
+            <div id="answer-text"></div>
+        </div>
     </div>
 
-    <button class="btn-next" onclick="nextQuestion()">次へすすむ ➔</button>
-    <div id="count" class="counter"></div>
+    <button id="next-btn" class="btn-next" onclick="nextQuestion()">次へ進む</button>
+    
+    <div class="progress" id="progress">0 / 0</div>
 </div>
 
 <script>
-    // CSVから抽出した全問題データ
-    const masterData = [
-        {q: "物質の成分である原子の種類を（元素）という。", a: "〇"},
-        {q: "1種類の元素からなる純物質を（化合物）という。", a: "単体"},
-        {q: "2種類以上の元素からなる純物質を（化合物）という。", a: "〇"},
-        {q: "ダイヤモンドと黒鉛のように、同じ元素からなる単体で性質が異なるものを（同位体）という。", a: "同素体"},
-        {q: "（蒸留）とは、液体を加熱して沸騰させ、生じた蒸気を冷やして再び液体として分離する操作である。", a: "〇"},
-        {q: "原子は、（原子核）とその周りにある電子からできている。", a: "〇"},
-        {q: "原子核は、陽子と（中性子）からできている。", a: "〇"},
-        {q: "陽子の数と電子の数は等しく、これを（原子番号）という。", a: "〇"},
-        {q: "陽子の数と中性子の数の和を（質量数）という。", a: "〇"},
-        {q: "原子番号が同じで、質量数が異なる原子どうしを（同位体）という。", a: "〇"},
-        {q: "電子が入っている層を（電子殻）という。", a: "〇"},
-        {q: "一番外側の電子殻にある電子を（価電子）という。", a: "〇"},
-        {q: "価電子の数が（0）のとき、原子は非常に安定している。", a: "〇"},
-        {q: "周期表の縦の列を（周期）という。", a: "族"},
-        {q: "周期表の横の行を（周期）という。", a: "〇"},
-        {q: "周期表の18族の元素を（希ガス）という。", a: "〇"},
-        {q: "原子が電子を放出したり、受け取ったりして電荷を帯びた粒子を（分子）という。", a: "イオン"},
-        {q: "原子が電子を失って、正の電荷を帯びたものを（陽イオン）という。", a: "〇"},
-        {q: "原子が電子を受け取って、負の電荷を帯びたものを（陰イオン）という。", a: "〇"},
-        {q: "陽イオンと陰イオンが静電気的な力で結合することを（共有結合）という。", a: "イオン結合"},
-        {q: "2個以上の原子が電子を共有してできる結合を（共有結合）という。", a: "〇"},
-        {q: "原子が共有している電子対を（共有電子対）という。", a: "〇"},
-        {q: "共有結合によってできた粒子を（分子）という。", a: "〇"},
-        {q: "自由電子によって生じる金属特有の結合を（金属結合）という。", a: "〇"}
+    // CSVデータから抽出した問題リスト
+    const allQuestions = [
+        {"q": "（酸素、水、塩化ナトリウム）はすべて純物質である。", "a": "〇"},
+        {"q": "純物質の融点、沸点は一定だが、混合物の融点、沸点は（一定ではない）。", "a": "〇"},
+        {"q": "混合物は、物理的方法で2種類以上の（純物質）に分けられる。", "a": "〇"},
+        {"q": "（ろ過）でヨウ素と砂の混合物からヨウ素だけを取り出すことができる。", "a": "昇華法"},
+        {"q": "塩化銀の沈殿を含む水溶液から、塩化銀だけを取り出すには（ろ過）を用いる。", "a": "〇"},
+        {"q": "食塩水（溶液）から水（溶媒）だけを分離する際は（蒸留）を用いる。", "a": "〇"},
+        {"q": "（蒸留）とは、2種類以上の液体の混合物を沸点の差を利用して各成分に分離する方法である。", "a": "分留"},
+        {"q": "再結晶とは、不純物を含む結晶を溶媒に溶かしてから冷却し、純粋な（結晶）として取り出す方法である。", "a": "〇"},
+        {"q": "再結晶は、（凝固点）の差を利用した分離方法である。", "a": "溶解度"},
+        {"q": "（ヨウ素、二酸化炭素、ナフタレン）はどれも昇華しやすい気体である。", "a": "〇"},
+        {"q": "溶媒への溶解性の違いを利用し、固体や液体の混合物から目的の物質を取り出す方法を（抽出法）という。", "a": "〇"},
+        {"q": "ろ紙に対する吸着力の違いを利用して、色素などの混合物を分離する操作を(ペーパークロマトグラフィー)という。", "a": "〇"},
+        {"q": "（元素）とは、物質を構成している基本的な成分のことである。", "a": "〇"},
+        {"q": "（単体）とは、1種類の元素からなる純物質のことである。", "a": "〇"},
+        {"q": "（化合物）とは、2種類以上の元素からなる純物質のことである。", "a": "〇"}
     ];
 
-    let quizList = [];
+    let currentQuestions = [];
     let currentIndex = 0;
-    const animals = ["🐶", "🐱", "🐰", "🦊", "🐻", "🐼", "🐨", "🦁", "🐧"];
 
-    function shuffle() {
-        quizList = [...masterData].sort(() => Math.random() - 0.5);
+    // 初期化：問題をシャッフルして開始
+    function initQuiz() {
+        currentQuestions = [...allQuestions].sort(() => Math.random() - 0.5);
         currentIndex = 0;
+        showQuestion();
     }
 
-    function showQuiz() {
-        const q = quizList[currentIndex];
-        document.getElementById('q-text').innerText = q.q;
-        document.getElementById('a-text').innerText = "答え： " + q.a;
-        document.getElementById('a-text').style.display = 'none';
-        document.getElementById('animal').innerText = animals[Math.floor(Math.random() * animals.length)];
-        document.getElementById('count').innerText = `問題 ${currentIndex + 1} / ${quizList.length}`;
+    // 問題を表示
+    function showQuestion() {
+        const q = currentQuestions[currentIndex];
+        document.getElementById('question-text').innerText = q.q;
+        document.getElementById('answer-text').innerText = q.a;
+        document.getElementById('answer-area').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('progress').innerText = `${currentIndex + 1} / ${currentQuestions.length}`;
     }
 
-    function revealAnswer() {
-        document.getElementById('a-text').style.display = 'block';
+    // 答えを表示
+    function showAnswer() {
+        if (document.getElementById('answer-area').style.display === 'none') {
+            document.getElementById('answer-area').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        }
     }
 
+    // 次の問題へ
     function nextQuestion() {
-        if (document.getElementById('a-text').style.display === 'none') {
-            revealAnswer();
-            return;
-        }
-        
         currentIndex++;
-        if (currentIndex < quizList.length) {
-            showQuiz();
+        if (currentIndex < currentQuestions.length) {
+            showQuestion();
         } else {
-            alert("お疲れ様でした！全問終了です。最初から解き直しましょう！");
-            shuffle();
-            showQuiz();
+            alert('全問終了です！最初に戻ります。');
+            initQuiz();
         }
     }
 
-    // 初期化
-    shuffle();
-    showQuiz();
+    // 起動
+    initQuiz();
 </script>
 
 </body>
