@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化学基礎正誤チェック</title>
+    <style>
+        :root {
+            --main-blue: #4facfe;
+            --main-green: #00f2fe;
+            --accent-color: #ff6b6b;
+            --bg-color: #f0f9ff;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        #app-container {
+            width: 90%;
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .question-box {
+            background: #f8fdfd;
+            border: 2px solid var(--main-blue);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            line-height: 1.6;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.3s;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-true { background-color: #4cd137; }
+        .btn-false { background-color: #e84118; }
+        
+        button:active { transform: scale(0.95); }
+
+        #result-area {
+            display: none;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            animation: fadeIn 0.3s;
+        }
+
+        .correct-anim {
+            color: #4cd137;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .incorrect-anim {
+            color: #e84118;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .answer-text {
+            font-size: 1rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            background: #eee;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .next-btn {
+            background: linear-gradient(to right, var(--main-blue), var(--main-green));
+            padding: 10px 30px;
+            font-size: 1rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <h1>化学基礎正誤チェック</h1>
+    <p class="description">（　）の語句が正しければ〇、間違っていれば正しい語句を考えよう！</p>
+    
+    <div class="progress" id="progress">0 / 0</div>
+    <div class="question-box" id="question">読み込み中...</div>
+
+    <div class="btn-group" id="controls">
+        <button class="btn-true" onclick="checkAnswer(true)">〇</button>
+        <button class="btn-false" onclick="checkAnswer(false)">×</button>
+    </div>
+
+    <div id="result-area">
+        <div id="feedback"></div>
+        <div class="answer-text" id="answer-detail"></div>
+        <button class="next-btn" onclick="nextQuestion()">次へ進む</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "（酸素、水、塩化ナトリウム）はすべて純物質である。", a: true, detail: "正解：〇" },
+        { q: "純物質と混合物の融点、沸点は（どちらも一定である）。", a: false, detail: "正解：×（混合物の融点・沸点は一定ではない）" },
+        { q: "混合物は、物理的方法で2種類以上の（純物質）に分けられる。", a: true, detail: "正解：〇" },
+        { q: "（ろ過）でヨウ素と砂の混合物からヨウ素だけを取り出すことができる。", a: false, detail: "正解：×（昇華法を用いる）" },
+        { q: "塩化銀の沈殿を含む水溶液から、塩化銀だけを取り出すには（ろ過）を用いる。", a: true, detail: "正解：〇" },
+        { q: "食塩水（溶液）から水（溶媒）だけを分離する際は（蒸留）を用いる。", a: true, detail: "正解：〇" },
+        { q: "（蒸留）とは、2種類以上の液体の混合物を沸点の差を利用して各成分に分離する方法である。", a: false, detail: "正解：×（分留）" },
+        { q: "再結晶とは、不純物を含む結晶を溶媒に溶かしてから冷却し、純粋な（結晶）として取り出す方法である。", a: true, detail: "正解：〇" },
+        { q: "再結晶は、（凝固点）の差を利用した分離方法である。", a: false, detail: "正解：×（溶解度の差を利用）" },
+        { q: "（ヨウ素、二酸化炭素、ナフタレン）はどれも昇華しやすい物体である。", a: true, detail: "正解：〇" },
+        { q: "溶媒への溶解性の違いを利用し、固体や液体の混合物から目的の物質を取り出す方法を（抽出法）という。", a: true, detail: "正解：〇" },
+        { q: "ろ紙に対する吸着力の違いを利用して、色素などの混合物を分離する操作を（ペーパークロマトグラフィー）という。", a: true, detail: "正解：〇" },
+        { q: "エタノールは（純物質）である。", a: true, detail: "正解：〇" },
+        { q: "塩酸は（純物質）である。", a: false, detail: "正解：×（水と塩化水素の混合物）" },
+        { q: "塩化水素は（混合物）である。", a: false, detail: "正解：×（純物質・HCl）" },
+        { q: "炭酸水は（化合物）である。", a: false, detail: "正解：×（二酸化炭素と水の混合物）" },
+        { q: "（酸素、水、塩酸）はすべて純物質である。", a: false, detail: "正解：×（塩酸は混合物）" },
+        { q: "（石油、エタノール、海水）はすべて混合物である。", a: false, detail: "正解：×（エタノールは純物質）" },
+        { q: "塩化銀の沈殿を含む水溶液から、塩化銀だけを取り出すには（抽出）を用いる。", a: false, detail: "正解：×（ろ過を用いる）" }
+    ];
+
+    let shuffledQuiz = [];
+    let currentIndex = 0;
+
+    function initQuiz() {
+        shuffledQuiz = [...quizData].sort(() => Math.random() - 0.5);
+        currentIndex = 0;
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = shuffledQuiz[currentIndex];
+        document.getElementById('question').innerText = q.q;
+        document.getElementById('progress').innerText = `${currentIndex + 1} / ${shuffledQuiz.length}`;
+        document.getElementById('result-area').style.display = 'none';
+        document.getElementById('controls').style.display = 'flex';
+    }
+
+    function checkAnswer(userChoice) {
+        const q = shuffledQuiz[currentIndex];
+        const feedback = document.getElementById('feedback');
+        const detail = document.getElementById('answer-detail');
+        
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('result-area').style.display = 'block';
+
+        if (userChoice === q.a) {
+            const reactions = ["正解！✨", "Good! 👍", "その調子！🔥", "天才！👏"];
+            feedback.innerHTML = `<div class="correct-anim">${reactions[Math.floor(Math.random()*reactions.length)]}</div>`;
+        } else {
+            feedback.innerHTML = `<div class="incorrect-anim">残念！どんまい！💦</div>`;
+        }
+        detail.innerText = q.detail;
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex < shuffledQuiz.length) {
+            showQuestion();
+        } else {
+            alert("全問終了しました！最初に戻ります。");
+            initQuiz();
+        }
+    }
+
+    // クイズ開始
+    initQuiz();
+</script>
+
+</body>
+</html>
