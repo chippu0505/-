@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化学基礎⭐︎分離・純物質クイズ</title>
+    <style>
+        :root {
+            --primary-color: #ff6b81;
+            --secondary-color: #2ed573;
+            --bg-color: #f1f2f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, "Hiragino Sans", "Meiryo";
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #app {
+            width: 90%;
+            max-width: 450px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header {
+            font-size: 0.9rem;
+            color: #747d8c;
+            margin-bottom: 20px;
+        }
+
+        .question-box {
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            line-height: 1.6;
+            color: #2f3542;
+            margin-bottom: 20px;
+        }
+
+        .answer-box {
+            display: none;
+            background: #fff9db;
+            padding: 20px;
+            border-radius: 20px;
+            border: 3px dashed var(--primary-color);
+            margin-bottom: 20px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .answer-box.show { display: block; }
+
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .mark {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .label {
+            display: block;
+            font-weight: bold;
+            color: #ff4757;
+            margin-top: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+            box-shadow: 0 4px 0 #bbb;
+        }
+
+        button:active { transform: translateY(3px); box-shadow: 0 1px 0 #bbb; }
+
+        .btn-check { background-color: var(--secondary-color); box-shadow: 0 4px 0 #26af5e; }
+        .btn-next { background-color: var(--primary-color); box-shadow: 0 4px 0 #e84118; }
+
+        #finish-screen { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="quiz-screen">
+        <div class="header">問題 <span id="current-idx">1</span> / <span id="total-idx">0</span></div>
+        <div class="question-box" id="question"></div>
+        
+        <div class="answer-box" id="answer-box">
+            <span id="mark" class="mark"></span>
+            <div id="correct-ans" style="font-size: 1.1rem; font-weight: bold;"></div>
+        </div>
+
+        <button id="action-btn" class="btn-check" onclick="handleAction()">答えをチェック！</button>
+    </div>
+
+    <div id="finish-screen">
+        <h2 style="font-size: 2rem;">🏆 CLEAR!</h2>
+        <p>すべての問題が終わりました！</p>
+        <button class="btn-check" onclick="reset()">はじめから解く</button>
+    </div>
+</div>
+
+<script>
+    const rawData = [
+        ["（酸素、水、塩化ナトリウム）はすべて純物質である。", "〇"],
+        ["純物質の融点、沸点は一定だが、混合物の融点、沸点は（一定ではない）。", "〇"],
+        ["混合物は、物理的方法で2種類以上の（純物質）に分けられる。", "〇"],
+        ["（ろ過）でヨウ素と砂の混合物からヨウ素だけを取り出すことができる。", "昇華法"],
+        ["塩化銀の沈殿を含む水溶液から、塩化銀だけを取り出すには（ろ過）を用いる。", "〇"],
+        ["食塩水（溶液）から水（溶媒）だけを分離する際は（蒸留）を用いる。", "〇"],
+        ["（蒸留）とは、2種類以上の液体の混合物を沸点の差を利用して各成分に分離する方法である。", "分留"],
+        ["再結晶とは、不純物を含む結晶を溶媒に溶かしてから冷却し、純粋な（結晶）として取り出す方法である。", "〇"],
+        ["再結晶は、（凝固点）の差を利用した分離方法である。", "溶解度"],
+        ["（ヨウ素、二酸化炭素、ナフタレン）はどれも昇華しやすい気体である。", "〇"],
+        ["溶媒への溶解性の違いを利用し、固体や液体の混合物から目的の物質を取り出す方法を（抽出法）という。", "〇"],
+        ["ろ紙に対する吸着力の違いを利用して、色素などの混合物を分離する操作を(ペーパークロマトグラフィー)という。", "〇"],
+        ["エタノールは（純物質）である。", "〇"],
+        ["塩酸は（純物質）である。", "(水と塩化水素の)混合物"],
+        ["石油は（混合物）である。", "〇"],
+        ["炭酸水は（化合物）である。", "(CO₂と水の)混合物"]
+    ];
+
+    let quiz = [];
+    let current = 0;
+    let isAnswered = false;
+
+    function init() {
+        quiz = rawData.map(item => ({ q: item[0], a: item[1] }))
+                     .sort(() => Math.random() - 0.5);
+        current = 0;
+        document.getElementById('total-idx').textContent = quiz.length;
+        render();
+    }
+
+    function render() {
+        isAnswered = false;
+        document.getElementById('current-idx').textContent = current + 1;
+        document.getElementById('question').textContent = quiz[current].q;
+        document.getElementById('answer-box').classList.remove('show');
+        const btn = document.getElementById('action-btn');
+        btn.textContent = "答えをチェック！";
+        btn.className = "btn-check";
+    }
+
+    function handleAction() {
+        if (!isAnswered) {
+            const ans = quiz[current].a;
+            const markEl = document.getElementById('mark');
+            const detailEl = document.getElementById('correct-ans');
+            
+            if (ans === "〇") {
+                markEl.textContent = "〇";
+                markEl.style.color = "#ff4757";
+                detailEl.textContent = "正解！その通り！";
+            } else {
+                markEl.textContent = "×";
+                markEl.style.color = "#2f3542";
+                detailEl.innerHTML = `<span class="label">正しくは...</span>${ans}`;
+            }
+            
+            document.getElementById('answer-box').classList.add('show');
+            const btn = document.getElementById('action-btn');
+            btn.textContent = "次の問題へ ＞";
+            btn.className = "btn-next";
+            isAnswered = true;
+        } else {
+            current++;
+            if (current < quiz.length) {
+                render();
+            } else {
+                document.getElementById('quiz-screen').style.display = 'none';
+                document.getElementById('finish-screen').style.display = 'block';
+            }
+        }
+    }
+
+    function reset() {
+        document.getElementById('quiz-screen').style.display = 'block';
+        document.getElementById('finish-screen').style.display = 'none';
+        init();
+    }
+
+    init();
+</script>
+</body>
+</html>
